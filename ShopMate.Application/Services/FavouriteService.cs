@@ -52,7 +52,6 @@ namespace ShopMate.Application.Services
         
         public Task<List<Favourite>> GetAllFavourites(int userId)
         {
-
             var favourites = _dbContext.Favourites.Where(x => x.UserId == userId).ToList();
             return Task.FromResult(favourites);
         }

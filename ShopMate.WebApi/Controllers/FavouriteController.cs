@@ -22,7 +22,7 @@ namespace ShopMate.WebApi.Controllers
         
         
         [HttpGet("/favourites")]
-        public async Task GetAllFavourites()
+        public async Task<ActionResult<List<Favourite>>> GetAllFavourites()
         {
             int userId = 1;
             var authorisedUser = _dbContext.Users.FirstOrDefault(x => x.Id == userId);
@@ -35,7 +35,8 @@ namespace ShopMate.WebApi.Controllers
                 throw new InvalidOperationException("Count value is not correct.");
             }
 
-            await _favouriteService.GetAllFavourites(authorisedUser.Id);
+            var favourites = await _favouriteService.GetAllFavourites(authorisedUser.Id);
+            return Ok(favourites);
         }
         
         
