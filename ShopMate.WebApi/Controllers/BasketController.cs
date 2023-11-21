@@ -14,42 +14,36 @@ namespace ShopMate.WebApi.Controllers
     {
         private readonly ShopMateDbContext _dbContext;
         private readonly BasketService _basketService;
+        private readonly UserService _userService;
         public BasketController(ShopMateDbContext dbContext)
         {
             _dbContext = dbContext;
             _basketService = new BasketService(_dbContext);
+            _userService = new UserService(_dbContext);
         }
         [HttpPost("/basket/add")]
         public async Task Add(ProductBasket productBasket)
         {
             int userId = 1;
-            var authorisedUser = _dbContext.Users.FirstOrDefault(x => x.Id == userId);
-            if (authorisedUser == null)
-            {
-                throw new InvalidOperationException("User is not found.");
-            }
+            var authorisedUser = await _userService.GetByIdAsync(userId);
             if (!ModelState.IsValid)
             {
                 throw new InvalidOperationException("Count value is not correct.");
             }
-            await _basketService.Add(authorisedUser.Id, productBasket.ProductId, productBasket.Count);
+            await _basketService.AddAsync(authorisedUser.Id, productBasket.ProductId, productBasket.Count);
         }
 
         [HttpDelete("/basket/delete")]
         public async Task Delete(ProductBasket productBasket)
         {
             int userId = 1;
-            var authorisedUser = _dbContext.Users.FirstOrDefault(x => x.Id == userId);
-            if (authorisedUser == null)
-            {
-                throw new InvalidOperationException("User is not found.");
-            }
+            var authorisedUser = await _userService.GetByIdAsync(userId);
             if (!ModelState.IsValid)
             {
                 throw new InvalidOperationException("Count value is not correct.");
             }
 
-            await _basketService.Delete(authorisedUser.Id, productBasket.ProductId, productBasket.Count);
+            await _basketService.DeleteAsync(authorisedUser.Id, productBasket.ProductId, productBasket.Count);
         }
     }
 }

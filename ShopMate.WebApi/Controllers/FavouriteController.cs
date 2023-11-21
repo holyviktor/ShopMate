@@ -14,10 +14,12 @@ namespace ShopMate.WebApi.Controllers
     {
         private readonly ShopMateDbContext _dbContext;
         private readonly FavouriteService _favouriteService;
+        private readonly UserService _userService;
         public FavouriteController(ShopMateDbContext dbContext)
         {
             _dbContext = dbContext;
             _favouriteService = new FavouriteService(_dbContext);
+            _userService = new UserService(_dbContext);
         }
         
         
@@ -25,11 +27,7 @@ namespace ShopMate.WebApi.Controllers
         public async Task<ActionResult<List<Favourite>>> GetAllFavourites()
         {
             int userId = 1;
-            var authorisedUser = _dbContext.Users.FirstOrDefault(x => x.Id == userId);
-            if (authorisedUser == null)
-            {
-                throw new InvalidOperationException("User is not found.");
-            }
+            var authorisedUser = await _userService.GetByIdAsync(userId);
             if (!ModelState.IsValid)
             {
                 throw new InvalidOperationException("Count value is not correct.");
@@ -44,11 +42,7 @@ namespace ShopMate.WebApi.Controllers
         public async Task Add(ProductFavourite productFavourite)
         {
             int userId = 1;
-            var authorisedUser = _dbContext.Users.FirstOrDefault(x => x.Id == userId);
-            if (authorisedUser == null)
-            {
-                throw new InvalidOperationException("User is not found.");
-            }
+            var authorisedUser = await _userService.GetByIdAsync(userId);
             if (!ModelState.IsValid)
             {
                 throw new InvalidOperationException("Count value is not correct.");
@@ -62,11 +56,7 @@ namespace ShopMate.WebApi.Controllers
         public async Task Delete(ProductFavourite productFavourite)
         {
             int userId = 1;
-            var authorisedUser = _dbContext.Users.FirstOrDefault(x => x.Id == userId);
-            if (authorisedUser == null)
-            {
-                throw new InvalidOperationException("User is not found.");
-            }
+            var authorisedUser = await _userService.GetByIdAsync(userId);
             if (!ModelState.IsValid)
             {
                 throw new InvalidOperationException("Count value is not correct.");
