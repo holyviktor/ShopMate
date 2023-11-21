@@ -19,6 +19,7 @@ namespace ShopMate.Infrastructure.Data
         public DbSet<Participant> Participants { get; set; }
         public DbSet<Review> Reviews { get; set; }
         public DbSet<User> Users { get;set; }
+        public DbSet<Status> Statuses { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(ShopMateDbContext).Assembly);

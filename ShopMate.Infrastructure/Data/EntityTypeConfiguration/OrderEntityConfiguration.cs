@@ -25,6 +25,11 @@ namespace ShopMate.Infrastructure.Data.EntityTypeConfiguration
                 .HasForeignKey<Order>(x=>x.CouponId)
                 .OnDelete(DeleteBehavior.NoAction)
                 .IsRequired();
+            builder.HasOne(x => x.Status)
+               .WithMany(x => x.Orders)
+               .HasForeignKey(x => x.StatusId)
+               .OnDelete(DeleteBehavior.NoAction)
+               .IsRequired();
 
         }
     }

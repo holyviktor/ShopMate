@@ -11,11 +11,12 @@ namespace ShopMate.Core.Entities
         public int Id { get; set; }
         public int UserId { get; set; }
         public DateTime Date { get; set; }
-        public bool isPaid { get; set; }
+        public int StatusId { get; set; }
         public Double TotalPrice { get; set; }
         public int CouponId { get; set; }
         public User User { get; set; }
         public Coupon Coupon { get; set; }
         public ICollection<OrderProduct> Products { get; set; }
+        public Status Status { get; set; }
     }
 }
