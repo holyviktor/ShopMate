@@ -6,6 +6,7 @@ using ShopMate.WebApi.Models;
 using ShopMate.Application.Services;
 using System.Net.Http.Headers;
 using System.Text;
+using AutoMapper;
 
 namespace ShopMate.WebApi.Controllers
 {
@@ -15,11 +16,13 @@ namespace ShopMate.WebApi.Controllers
         private readonly ShopMateDbContext _dbContext;
         private readonly FavouriteService _favouriteService;
         private readonly UserService _userService;
-        public FavouriteController(ShopMateDbContext dbContext)
+        private readonly IMapper _mapper;
+        public FavouriteController(ShopMateDbContext dbContext, IMapper mapper)
         {
             _dbContext = dbContext;
             _favouriteService = new FavouriteService(_dbContext);
             _userService = new UserService(_dbContext);
+            _mapper = mapper;
         }
         
         
@@ -34,7 +37,8 @@ namespace ShopMate.WebApi.Controllers
             }
 
             var favourites = await _favouriteService.GetAllFavourites(authorisedUser.Id);
-            return Ok(favourites);
+            var favouritesModel = _mapper.Map<List<ProductFavourite>>(favourites);
+            return Ok(favouritesModel);
         }
         
         
