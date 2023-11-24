@@ -8,6 +8,8 @@ namespace ShopMate.WebApi.Models.Mapping
         public MappingProfile()
         {
             this.CreateMap<Favourite, ProductFavourite>();
+            this.CreateMap<Review, ProductReview>();
+            this.CreateMap<User, UserForReview>();
         }
     }
 }

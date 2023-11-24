@@ -79,7 +79,7 @@ namespace ShopMate.Application.Services
                 .SingleOrDefault(x => x.ProductId == productId);
             if (favourite == null)
             {
-                throw new InvalidOperationException("BasketNotFound");
+                throw new InvalidOperationException("FavouriteNotFound");
             } else
             {
                 _dbContext.Favourites.Remove(favourite);
