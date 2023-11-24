@@ -6,6 +6,6 @@ namespace ShopMate.WebApi.Models
     {
         public string ProductId { get; set; }
         [Range(1, Int32.MaxValue)]
-        public int Count { get; set; }
+        public int Number { get; set; }
     }
 }

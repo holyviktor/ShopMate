@@ -10,6 +10,8 @@ namespace ShopMate.WebApi.Models.Mapping
             this.CreateMap<Favourite, ProductFavourite>();
             this.CreateMap<Review, ProductReview>();
             this.CreateMap<User, UserForReview>();
+            this.CreateMap<Basket, ProductBasket>();
+            this.CreateMap<User, UserProfile>();
         }
     }
 }

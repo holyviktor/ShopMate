@@ -6,6 +6,7 @@ using ShopMate.WebApi.Models;
 using ShopMate.Application.Services;
 using System.Net.Http.Headers;
 using System.Text;
+using AutoMapper;
 
 namespace ShopMate.WebApi.Controllers
 {
@@ -15,12 +16,25 @@ namespace ShopMate.WebApi.Controllers
         private readonly ShopMateDbContext _dbContext;
         private readonly BasketService _basketService;
         private readonly UserService _userService;
-        public BasketController(ShopMateDbContext dbContext)
+        private readonly IMapper _mapper;
+        public BasketController(ShopMateDbContext dbContext, IMapper mapper)
         {
             _dbContext = dbContext;
             _basketService = new BasketService(_dbContext);
             _userService = new UserService(_dbContext);
+            _mapper = mapper;
         }
+        [HttpGet("/basket")]
+        public async Task<List<ProductBasket>> Index()
+        {
+            int userId = 1;
+            var authorisedUser = await _userService.GetByIdAsync(userId);
+            var baskets = _dbContext.Baskets.Where(b => b.UserId == authorisedUser.Id).ToList();
+            var productsBasket = _mapper.Map<List<ProductBasket>>(baskets);
+            return productsBasket;
+
+        }
+        
         [HttpPost("/basket/add")]
         public async Task Add(ProductBasket productBasket)
         {
@@ -30,7 +44,7 @@ namespace ShopMate.WebApi.Controllers
             {
                 throw new InvalidOperationException("Count value is not correct.");
             }
-            await _basketService.AddAsync(authorisedUser.Id, productBasket.ProductId, productBasket.Count);
+            await _basketService.AddAsync(authorisedUser.Id, productBasket.ProductId, productBasket.Number);
         }
 
         [HttpDelete("/basket/delete")]
@@ -43,7 +57,8 @@ namespace ShopMate.WebApi.Controllers
                 throw new InvalidOperationException("Count value is not correct.");
             }
 
-            await _basketService.DeleteAsync(authorisedUser.Id, productBasket.ProductId, productBasket.Count);
+            await _basketService.DeleteAsync(authorisedUser.Id, productBasket.ProductId, productBasket.Number);
         }
+        
     }
 }
