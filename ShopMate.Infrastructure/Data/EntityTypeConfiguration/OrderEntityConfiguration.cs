@@ -15,9 +15,9 @@ namespace ShopMate.Infrastructure.Data.EntityTypeConfiguration
         {
             builder.HasKey(x => x.Id);
 
-            builder.HasOne(x => x.User)
+            builder.HasOne(x => x.UserAddress)
                 .WithMany(x => x.Orders)
-                .HasForeignKey(x => x.UserId)
+                .HasForeignKey(x => x.UserAddressId)
                 .OnDelete(DeleteBehavior.NoAction)
                 .IsRequired();
             builder.HasOne(x => x.Coupon)

@@ -22,6 +22,7 @@ namespace ShopMate.Core.Entities
         public ICollection<Favourite> Favourites { get; set; }
         public ICollection<Review> Reviews { get; set; }
         public ICollection<Order> Orders { get; set; }
+        public ICollection<UserAddress> UserAddresses { get; set; }
 
     }
 }

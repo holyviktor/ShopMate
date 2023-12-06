@@ -1,4 +1,5 @@
-﻿using ShopMate.Core.Entities;
+﻿using Microsoft.EntityFrameworkCore;
+using ShopMate.Core.Entities;
 using ShopMate.Infrastructure.Data;
 
 namespace ShopMate.Application.Services;
@@ -75,8 +76,9 @@ public class ReviewService
 
     private bool IsVerified(int userId, string productId)
     {
-        var orderProd = _dbContext.OrderProducts.Where(x => x.ProductId == productId)
-            .SingleOrDefault(x=>x.Order.UserId==userId);
+        var orderProd = _dbContext.OrderProducts
+            .Where(x => x.ProductId == productId)
+            .SingleOrDefault(x=>x.Order.UserAddress.UserId==userId);
     
         return orderProd!=null?true:false;
     }
