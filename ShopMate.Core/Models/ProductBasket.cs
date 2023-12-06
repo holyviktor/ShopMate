@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace ShopMate.WebApi.Models
+namespace ShopMate.Core.Models
 {
     public class ProductBasket
     {

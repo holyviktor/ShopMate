@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using ShopMate.Core.Entities;
 using ShopMate.Core.Interfaces;
+using ShopMate.Core.Models;
 using ShopMate.Infrastructure.Data;
 
 namespace ShopMate.Application.Services
@@ -11,6 +12,22 @@ namespace ShopMate.Application.Services
         public BasketService(ShopMateDbContext dbContext)
         {
             _dbContext = dbContext;
+        }
+
+        public async Task<List<Basket>> GetProductsAsync(int userId, int[] productsIds)
+        {
+            List<Basket> basketProducts = new List<Basket>();
+            foreach(var product in productsIds)
+            {
+                var basketProduct = await _dbContext.Baskets
+                    .FirstOrDefaultAsync(b => b.UserId == userId && b.ProductId == product.ToString());
+                if (basketProduct == null)
+                {
+                    throw new InvalidOperationException();
+                }
+                basketProducts.Add(basketProduct);
+            }
+            return basketProducts;
         }
         public async Task AddAsync(int userId, string productId, int count)
         {

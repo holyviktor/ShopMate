@@ -1,12 +1,8 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using ShopMate.Core.Entities;
+﻿using Microsoft.AspNetCore.Mvc;
 using ShopMate.Infrastructure.Data;
-using ShopMate.WebApi.Models;
 using ShopMate.Application.Services;
-using System.Net.Http.Headers;
-using System.Text;
 using AutoMapper;
+using ShopMate.Core.Models;
 
 namespace ShopMate.WebApi.Controllers
 {
