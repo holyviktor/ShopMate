@@ -42,5 +42,7 @@ public class ProfileController:Controller
         authorisedUser.DateBirth = profileInput.DateBirth;
         await _dbContext.SaveChangesAsync();
     }
+
+  
     
 }
