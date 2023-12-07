@@ -28,8 +28,7 @@ public class ReviewController : Controller
     [HttpGet("/reviews")]
     public async Task<ActionResult<List<Review>>> GetAllReviews(string idProduct)
     {
-        int userId = 1;
-        var authorisedUser = await _userService.GetByIdAsync(userId);
+        
         if (!ModelState.IsValid)
         {
             throw new InvalidOperationException("Count value is not correct.");
@@ -43,6 +42,33 @@ public class ReviewController : Controller
             reviewsModel[i].UserForReview = user;
         }
         return Ok(reviewsModel);
+    }
+    
+    
+    [HttpGet("/getRating")]
+    public async Task<ActionResult<double>> GetRating(string idProduct)
+    {
+        if (!ModelState.IsValid)
+        {
+            throw new InvalidOperationException("Count value is not correct.");
+        }
+
+        var rating = await _reviewService.GetRating(idProduct);
+        
+        return Ok(rating);
+    }
+    
+    [HttpGet("/getListRating")]
+    public async Task<ActionResult<List<double>>> GetListRating([FromQuery]string[] idProducts)
+    {
+        if (!ModelState.IsValid)
+        {
+            throw new InvalidOperationException("Count value is not correct.");
+        }
+
+        var rating = await _reviewService.GetListRating(idProducts);
+        
+        return Ok(rating);
     }
     
     [HttpPost("/review/add")]
