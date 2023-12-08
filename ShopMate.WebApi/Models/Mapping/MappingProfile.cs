@@ -17,6 +17,7 @@ namespace ShopMate.WebApi.Models.Mapping
             this.CreateMap<OrderInput, OrderCreationInfo>();
             this.CreateMap<CreateOrder, OrderCreationInfo>();
             this.CreateMap<Address, UserAddressModel>();
+            this.CreateMap<Coupon, CouponModel>();
         }
     }
 }
