@@ -6,10 +6,12 @@ using System.Threading.Tasks;
 
 namespace ShopMate.Core.Entities
 {
-    public class Status
+    public enum Status
     {
-        public int Id { get; set; }
-        public string Name { get; set; }
-        public ICollection<Order> Orders { get; set;}
+        Unpaid,
+        InProcess,
+        Sent,
+        Delivered,
+        Cancelled,
     }
 }

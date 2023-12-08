@@ -55,7 +55,7 @@ namespace ShopMate.Application.Services
             {
                 throw new InvalidOperationException("Coupon is not valid.");
             }
-            if (coupon.isUsed)
+            if (!coupon.isUsed)
             {
                 throw new InvalidOperationException("Coupon is already used.");
             }

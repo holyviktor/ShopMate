@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ShopMate.Infrastructure.Data;
 
@@ -11,9 +12,11 @@ using ShopMate.Infrastructure.Data;
 namespace ShopMate.Infrastructure.Migrations
 {
     [DbContext(typeof(ShopMateDbContext))]
-    partial class ShopMateDbContextModelSnapshot : ModelSnapshot
+    [Migration("20231208094123_StatusEnumMigration")]
+    partial class StatusEnumMigration
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -191,6 +194,9 @@ namespace ShopMate.Infrastructure.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<int>("StatusId")
                         .HasColumnType("int");
 
                     b.Property<double>("TotalPrice")

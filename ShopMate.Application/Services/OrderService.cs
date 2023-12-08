@@ -37,7 +37,7 @@ public class OrderService : IOrderService
             throw new InvalidOperationException("User address not found");
         }
 
-        var status = await _dbContext.Statuses.FindAsync(1);
+        /*var status = await _dbContext.Statuses.FindAsync(1);
         if (status == null)
         {
             status = new Status
@@ -46,13 +46,13 @@ public class OrderService : IOrderService
             };
             _dbContext.Statuses.Add(status);
             await _dbContext.SaveChangesAsync();
-        }
+        }*/
 
         var order = new Order
         {
             UserAddressId = userAddress.Id,
             Date = DateTime.Now,
-            StatusId = status.Id,
+            Status = Status.Unpaid,
             CouponId = null
         };
         if (coupon != null)
