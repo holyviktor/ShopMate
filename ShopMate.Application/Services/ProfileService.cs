@@ -2,6 +2,7 @@
 using ShopMate.Core.Entities;
 using ShopMate.Infrastructure.Data;
 
+
 namespace ShopMate.Application.Services;
 
 public class ProfileService
@@ -13,9 +14,20 @@ public class ProfileService
         _dbContext = dbContext;
     }
 
-    public Task<List<Coupon>> GetUserCoupons(int userId)
+    public Task<List<Coupon>> GetUserCoupons(int userId,string statusCoupon)
     {
-        return Task.FromResult(_dbContext.Coupons.Where(x => x.UserId == userId && x.isUsed==false).ToList());
+        if (statusCoupon == "Active")
+        {
+            return Task.FromResult(_dbContext.Coupons.Where(x => x.UserId == userId && x.isUsed==false && x.DateExpiration>=DateTime.Now).ToList());
+        }else if (statusCoupon == "Used")
+        {
+            return Task.FromResult(_dbContext.Coupons.Where(x => x.UserId == userId && x.isUsed==true).ToList());
+        }else if (statusCoupon == "Overdue")
+        {
+            return Task.FromResult(_dbContext.Coupons.Where(x => x.UserId == userId && x.DateExpiration<DateTime.Now).ToList());
+        }
+        return Task.FromResult(_dbContext.Coupons.Where(x => x.UserId == userId).ToList());
+        
     }
     
     public Task<List<Order>> GetUserOrders(int userId, Status status)

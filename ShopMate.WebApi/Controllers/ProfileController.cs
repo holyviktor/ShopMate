@@ -47,11 +47,11 @@ public class ProfileController:Controller
     }
 
     [HttpGet("/profile/coupons")]
-    public async Task<ActionResult<List<CouponModel>>> GetUserCoupons()
+    public async Task<ActionResult<List<CouponModel>>> GetUserCoupons(StatusCoupon statusCoupon)
     {
         int userId = 1;
         var authorisedUser = await _userService.GetByIdAsync(userId);
-        var coupons = await _profileService.GetUserCoupons(authorisedUser.Id);
+        var coupons = await _profileService.GetUserCoupons(authorisedUser.Id, statusCoupon.ToString());
         
         return Ok(_mapper.Map<List<CouponModel>>(coupons));
     }
