@@ -15,7 +15,7 @@ public class ProfileService
 
     public Task<List<Coupon>> GetUserCoupons(int userId)
     {
-        return Task.FromResult(_dbContext.Coupons.Where(x => x.UserId == userId).ToList());
+        return Task.FromResult(_dbContext.Coupons.Where(x => x.UserId == userId && x.isUsed==false).ToList());
     }
     
     public Task<List<Order>> GetUserOrders(int userId, Status status)
