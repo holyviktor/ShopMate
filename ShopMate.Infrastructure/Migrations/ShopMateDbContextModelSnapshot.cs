@@ -297,6 +297,23 @@ namespace ShopMate.Infrastructure.Migrations
                     b.ToTable("Reviews");
                 });
 
+            modelBuilder.Entity("ShopMate.Core.Entities.Role", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Roles");
+                });
+
             modelBuilder.Entity("ShopMate.Core.Entities.User", b =>
                 {
                     b.Property<int>("Id")
@@ -328,7 +345,12 @@ namespace ShopMate.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("RoleId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("RoleId");
 
                     b.ToTable("Users");
                 });
@@ -471,6 +493,17 @@ namespace ShopMate.Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("ShopMate.Core.Entities.User", b =>
+                {
+                    b.HasOne("ShopMate.Core.Entities.Role", "Role")
+                        .WithMany("Users")
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Role");
+                });
+
             modelBuilder.Entity("ShopMate.Core.Entities.UserAddress", b =>
                 {
                     b.HasOne("ShopMate.Core.Entities.Address", "Address")
@@ -510,6 +543,11 @@ namespace ShopMate.Infrastructure.Migrations
             modelBuilder.Entity("ShopMate.Core.Entities.Order", b =>
                 {
                     b.Navigation("Products");
+                });
+
+            modelBuilder.Entity("ShopMate.Core.Entities.Role", b =>
+                {
+                    b.Navigation("Users");
                 });
 
             modelBuilder.Entity("ShopMate.Core.Entities.User", b =>

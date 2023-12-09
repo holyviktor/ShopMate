@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -15,6 +16,8 @@ namespace ShopMate.Core.Entities
         public string Password { get; set; }
         public DateTime DateBirth { get; set; }
         public string PhoneNumber { get; set; }
+        public int RoleId { get; set; }
+        
         public ICollection<Coupon> Coupons { get; set; }
         public ICollection<Message> Messages { get; set; }
         public ICollection<Participant> Participants { get; set; }
@@ -23,6 +26,6 @@ namespace ShopMate.Core.Entities
         public ICollection<Review> Reviews { get; set; }
         public ICollection<Order> Orders { get; set; }
         public ICollection<UserAddress> UserAddresses { get; set; }
-
+        public Role Role { get; set; }
     }
 }
