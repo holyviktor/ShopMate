@@ -7,6 +7,8 @@ using ShopMate.Application.Services;
 using System.Net.Http.Headers;
 using System.Text;
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
+using ShopMate.WebApi.Identity;
 
 namespace ShopMate.WebApi.Controllers
 {
@@ -25,7 +27,8 @@ namespace ShopMate.WebApi.Controllers
             _mapper = mapper;
         }
         
-        
+        [Authorize]
+        [RequiresClaim("user_role", "admin")]
         [HttpGet("/favourites")]
         public async Task<ActionResult<List<Favourite>>> GetAllFavourites()
         {
