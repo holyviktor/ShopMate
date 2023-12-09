@@ -1,7 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using ShopMate.Core.Entities;
 using ShopMate.Core.Interfaces;
-using ShopMate.Core.Models;
 using ShopMate.Infrastructure.Data;
 
 namespace ShopMate.Application.Services
@@ -23,7 +22,7 @@ namespace ShopMate.Application.Services
                     .FirstOrDefaultAsync(b => b.UserId == userId && b.ProductId == product.ToString());
                 if (basketProduct == null)
                 {
-                    throw new InvalidOperationException();
+                    throw new InvalidOperationException("Product is not in your basket.");
                 }
                 basketProducts.Add(basketProduct);
             }
@@ -99,6 +98,31 @@ namespace ShopMate.Application.Services
             
             await _dbContext.SaveChangesAsync();
         }
-
+        public async Task RemoveAsync(int userId, string productId)
+        {
+            var client = new HttpClient();
+            var request = new HttpRequestMessage
+            {
+                Method = HttpMethod.Get,
+                RequestUri = new Uri("https://dummyjson.com/products/" + productId),
+            };
+            var response = await client.SendAsync(request);
+            try
+            {
+                response.EnsureSuccessStatusCode();
+            }
+            catch (HttpRequestException)
+            {
+                throw new Exception(response.StatusCode.ToString());
+            }
+            var basket = await _dbContext.Baskets.Where(x => x.UserId == userId)
+                .SingleOrDefaultAsync(x => x.ProductId == productId);
+            if (basket == null)
+            {
+                throw new InvalidOperationException("BasketNotFound");
+            }
+            _dbContext.Baskets.Remove(basket);
+            await _dbContext.SaveChangesAsync();
+        }
     }
 }

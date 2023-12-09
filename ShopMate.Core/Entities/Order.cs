@@ -15,7 +15,7 @@ namespace ShopMate.Core.Entities
         public double TotalPrice { get; set; }
         public int? CouponId { get; set; }
         public UserAddress UserAddress { get; set; }
-        public Coupon Coupon { get; set; }
+        public Coupon? Coupon { get; set; }
         public ICollection<OrderProduct> Products { get; set; }
         [EnumDataType(typeof(Status))]
         public Status Status { get; set; }

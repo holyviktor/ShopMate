@@ -55,6 +55,13 @@ namespace ShopMate.WebApi.Controllers
 
             await _basketService.DeleteAsync(authorisedUser.Id, productBasket.ProductId, productBasket.Number);
         }
+        [HttpDelete("/basket/remove")]
+        public async Task Delete(string productId)
+        {
+            int userId = 1;
+            var authorisedUser = await _userService.GetByIdAsync(userId);
+            await _basketService.RemoveAsync(authorisedUser.Id, productId);
+        }
         
     }
 }

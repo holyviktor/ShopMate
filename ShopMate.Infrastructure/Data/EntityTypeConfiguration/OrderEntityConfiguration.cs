@@ -1,11 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using ShopMate.Core.Entities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ShopMate.Infrastructure.Data.EntityTypeConfiguration
 {
@@ -23,8 +18,7 @@ namespace ShopMate.Infrastructure.Data.EntityTypeConfiguration
             builder.HasOne(x => x.Coupon)
                 .WithOne(x => x.Order)
                 .HasForeignKey<Order>(x=>x.CouponId)
-                .OnDelete(DeleteBehavior.NoAction)
-                .IsRequired();
+                .OnDelete(DeleteBehavior.NoAction);
         }
     }
 }

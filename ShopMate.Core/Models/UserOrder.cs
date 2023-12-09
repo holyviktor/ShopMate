@@ -13,6 +13,7 @@ namespace ShopMate.Core.Models
         [Required]
         [MinLength(10)]
         [MaxLength(13)]
+        [RegularExpression("^(\\+38)?(0\\d{9})$")]
         public string PhoneNumber { get; set; }
         
     }
