@@ -5,6 +5,7 @@ using ShopMate.Infrastructure.Data;
 using ShopMate.WebApi.Models;
 using ShopMate.Application.Services;
 using System.Net.Http.Headers;
+using System.Security.Claims;
 using System.Text;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
@@ -32,8 +33,10 @@ namespace ShopMate.WebApi.Controllers
         [HttpGet("/favourites")]
         public async Task<ActionResult<List<Favourite>>> GetAllFavourites()
         {
-            int userId = 1;
-            var authorisedUser = await _userService.GetByIdAsync(userId);
+            // int userId = 1;
+            var userId = (HttpContext.User.Identity as ClaimsIdentity)?.FindFirst("userid")?.Value;
+            Console.WriteLine(userId);
+            var authorisedUser = await _userService.GetByIdAsync(Convert.ToInt32(userId));
             if (!ModelState.IsValid)
             {
                 throw new InvalidOperationException("Count value is not correct.");

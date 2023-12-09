@@ -27,5 +27,16 @@ public class UserController: Controller
         string token = await _userService.SignInUser(signInModel.Email, signInModel.Password);
         return token;
     }
+
+    [HttpPost("/signup")]
+    public async Task<string> SignUp(SignUpModel signUpModel)
+    {
+        if (!ModelState.IsValid)
+        {
+            throw new InvalidOperationException("Count value is not correct.");
+        }
+        string token = await _userService.SignUpUser(signUpModel.FirstName, signUpModel.LastName, signUpModel.Email, signUpModel.Password, signUpModel.DateBirth, signUpModel.PhoneNumber);
+        return token;
+    }
     
 }
