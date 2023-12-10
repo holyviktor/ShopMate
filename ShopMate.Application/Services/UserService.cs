@@ -1,4 +1,6 @@
-﻿using System.Text;
+﻿using System.Security.Cryptography;
+using System.Text;
+using System.Text.RegularExpressions;
 using Microsoft.EntityFrameworkCore;
 using ShopMate.Core.Entities;
 using ShopMate.Core.Interfaces;
@@ -35,7 +37,7 @@ public class UserService : IUserService
             throw new Exception("UserNoFound");
         }
 
-        if (user.Password != password)
+        if (user.Password != HashPassword(password))
         {
             throw new Exception("WrongPassword");
         }
@@ -84,19 +86,75 @@ public class UserService : IUserService
             FirstName = firstname,
             LastName = lastname,
             Email = email,
-            Password = password,
+            Password = HashPassword(password),
             DateBirth = dateBirth,
             PhoneNumber = phoneNumber,
             RoleId = 2
         };
+        ValidateUser(user);
         _dbContext.Users.Add(user);
         await _dbContext.SaveChangesAsync();
 
 
-        return await SignInUser(user.Email, user.Password);
+        return await SignInUser(email, password);
 
 
 
+    }
+
+    public void ValidateUser(User user)
+    {
+        if (!Regex.IsMatch(user.FirstName, @"^[a-zA-Z]+$"))
+        {
+            throw new Exception("WrongFirstName");
+        }
+
+        if (!Regex.IsMatch(user.LastName, @"^[a-zA-Z]+$"))
+        {
+            throw new Exception("WrongLastName");
+        }
+
+        try
+        {
+            var addr = new System.Net.Mail.MailAddress(user.Email);
+            
+        }
+        catch
+        {
+            throw new Exception("WrongEmail");
+        }
+
+        if (!Regex.IsMatch(user.PhoneNumber, @"^\+\d{1,3}\d{10}$"))
+        {
+            throw new Exception("WrongPhoneNumber");
+
+        }
+        var today = DateTime.Today;
+
+        
+        var age = today.Year - user.DateBirth.Year;
+        
+        if (user.DateBirth.Date > today.AddYears(-age))
+            age--;
+        
+        if (age< 16 )
+        {
+            throw new Exception("WrongDateBirth");
+
+        }
+    }
+    
+    public static string HashPassword(string password)
+    {
+        using (var sha256 = SHA256.Create())
+        {
+            var passwordBytes = Encoding.UTF8.GetBytes(password);
+            var hashBytes = sha256.ComputeHash(passwordBytes);
+            
+            // Перетворення хешу в рядок для збереження в базі даних
+            var hashString = Convert.ToBase64String(hashBytes);
+            return hashString;
+        }
     }
 }
 
