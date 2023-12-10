@@ -5,11 +5,14 @@ using ShopMate.Infrastructure.Data;
 using ShopMate.WebApi.Models;
 using ShopMate.Application.Services;
 using System.Net.Http.Headers;
+using System.Security.Claims;
 using System.Text;
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 
 namespace ShopMate.WebApi.Controllers;
 [ApiController]
+[Authorize]
 public class ReviewController : Controller
 {
     private readonly ShopMateDbContext _dbContext;
@@ -74,8 +77,10 @@ public class ReviewController : Controller
     [HttpPost("/review/add")]
     public async Task Add(ReviewForAdd reviewForAdd)
     {
-        int userId = 1;
-        var authorisedUser = await _userService.GetByIdAsync(userId);
+        // int userId = 1;
+        var userId = (HttpContext.User.Identity as ClaimsIdentity)?.FindFirst("userid")?.Value;
+
+        var authorisedUser = await _userService.GetByIdAsync(Convert.ToInt32(userId));
         if (!ModelState.IsValid)
         {
             throw new InvalidOperationException("Count value is not correct.");
@@ -87,8 +92,10 @@ public class ReviewController : Controller
     [HttpDelete("/review/delete")]
     public async Task Delete(int reviewId)
     {
-        int userId = 1;
-        var authorisedUser = await _userService.GetByIdAsync(userId);
+        // int userId = 1;
+        var userId = (HttpContext.User.Identity as ClaimsIdentity)?.FindFirst("userid")?.Value;
+
+        var authorisedUser = await _userService.GetByIdAsync(Convert.ToInt32(userId));
         if (!ModelState.IsValid)
         {
             throw new InvalidOperationException("Count value is not correct.");

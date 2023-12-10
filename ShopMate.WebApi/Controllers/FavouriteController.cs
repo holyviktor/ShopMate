@@ -13,6 +13,7 @@ using ShopMate.WebApi.Identity;
 
 namespace ShopMate.WebApi.Controllers
 {
+    [Authorize]
     [ApiController]
     public class FavouriteController : Controller
     {
@@ -28,14 +29,11 @@ namespace ShopMate.WebApi.Controllers
             _mapper = mapper;
         }
         
-        [Authorize]
-        [RequiresClaim("user_role", "admin")]
         [HttpGet("/favourites")]
         public async Task<ActionResult<List<Favourite>>> GetAllFavourites()
         {
             // int userId = 1;
             var userId = (HttpContext.User.Identity as ClaimsIdentity)?.FindFirst("userid")?.Value;
-            Console.WriteLine(userId);
             var authorisedUser = await _userService.GetByIdAsync(Convert.ToInt32(userId));
             if (!ModelState.IsValid)
             {
@@ -51,8 +49,10 @@ namespace ShopMate.WebApi.Controllers
         [HttpPost("/favourite/add")]
         public async Task Add(ProductFavourite productFavourite)
         {
-            int userId = 1;
-            var authorisedUser = await _userService.GetByIdAsync(userId);
+            // int userId = 1;
+            var userId = (HttpContext.User.Identity as ClaimsIdentity)?.FindFirst("userid")?.Value;
+
+            var authorisedUser = await _userService.GetByIdAsync(Convert.ToInt32(userId));
             if (!ModelState.IsValid)
             {
                 throw new InvalidOperationException("Count value is not correct.");
@@ -65,8 +65,10 @@ namespace ShopMate.WebApi.Controllers
         [HttpDelete("/favourite/delete")]
         public async Task Delete(ProductFavourite productFavourite)
         {
-            int userId = 1;
-            var authorisedUser = await _userService.GetByIdAsync(userId);
+            // int userId = 1;
+            var userId = (HttpContext.User.Identity as ClaimsIdentity)?.FindFirst("userid")?.Value;
+
+            var authorisedUser = await _userService.GetByIdAsync(Convert.ToInt32(userId));
             if (!ModelState.IsValid)
             {
                 throw new InvalidOperationException("Count value is not correct.");

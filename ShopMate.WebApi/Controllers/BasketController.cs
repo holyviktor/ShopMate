@@ -1,11 +1,14 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Security.Claims;
+using Microsoft.AspNetCore.Mvc;
 using ShopMate.Infrastructure.Data;
 using ShopMate.Application.Services;
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using ShopMate.Core.Models;
 
 namespace ShopMate.WebApi.Controllers
 {
+    [Authorize]
     [ApiController]
     public class BasketController : Controller
     {
@@ -23,8 +26,10 @@ namespace ShopMate.WebApi.Controllers
         [HttpGet("/basket")]
         public async Task<List<ProductBasket>> Index()
         {
-            int userId = 1;
-            var authorisedUser = await _userService.GetByIdAsync(userId);
+            // int userId = 1;
+            var userId = (HttpContext.User.Identity as ClaimsIdentity)?.FindFirst("userid")?.Value;
+
+            var authorisedUser = await _userService.GetByIdAsync(Convert.ToInt32(userId));
             var baskets = _dbContext.Baskets.Where(b => b.UserId == authorisedUser.Id).ToList();
             var productsBasket = _mapper.Map<List<ProductBasket>>(baskets);
             return productsBasket;
@@ -34,8 +39,10 @@ namespace ShopMate.WebApi.Controllers
         [HttpPost("/basket/add")]
         public async Task Add(ProductBasket productBasket)
         {
-            int userId = 1;
-            var authorisedUser = await _userService.GetByIdAsync(userId);
+            // int userId = 1;
+            var userId = (HttpContext.User.Identity as ClaimsIdentity)?.FindFirst("userid")?.Value;
+
+            var authorisedUser = await _userService.GetByIdAsync(Convert.ToInt32(userId));
             if (!ModelState.IsValid)
             {
                 throw new InvalidOperationException("Count value is not correct.");
@@ -46,8 +53,10 @@ namespace ShopMate.WebApi.Controllers
         [HttpDelete("/basket/delete")]
         public async Task Delete(ProductBasket productBasket)
         {
-            int userId = 1;
-            var authorisedUser = await _userService.GetByIdAsync(userId);
+            // int userId = 1;
+            var userId = (HttpContext.User.Identity as ClaimsIdentity)?.FindFirst("userid")?.Value;
+
+            var authorisedUser = await _userService.GetByIdAsync(Convert.ToInt32(userId));
             if (!ModelState.IsValid)
             {
                 throw new InvalidOperationException("Count value is not correct.");
@@ -58,8 +67,10 @@ namespace ShopMate.WebApi.Controllers
         [HttpDelete("/basket/remove")]
         public async Task Delete(string productId)
         {
-            int userId = 1;
-            var authorisedUser = await _userService.GetByIdAsync(userId);
+            // int userId = 1;
+            var userId = (HttpContext.User.Identity as ClaimsIdentity)?.FindFirst("userid")?.Value;
+
+            var authorisedUser = await _userService.GetByIdAsync(Convert.ToInt32(userId));
             await _basketService.RemoveAsync(authorisedUser.Id, productId);
         }
         

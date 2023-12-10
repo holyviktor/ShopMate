@@ -1,4 +1,6 @@
-﻿using AutoMapper;
+﻿using System.Security.Claims;
+using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ShopMate.Application.Services;
 using ShopMate.Core.Entities;
@@ -6,7 +8,8 @@ using ShopMate.Infrastructure.Data;
 using ShopMate.WebApi.Models;
 
 namespace ShopMate.WebApi.Controllers;
-
+[ApiController]
+[Authorize]
 public class ProfileController:Controller
 {
     private readonly ShopMateDbContext _dbContext;
@@ -23,16 +26,20 @@ public class ProfileController:Controller
     [HttpGet("/profile")]
     public async Task<UserProfile> Index()
     {
-        int userId = 1;
-        var authorisedUser = await _userService.GetByIdAsync(userId);
+        // int userId = 1;
+        var userId = (HttpContext.User.Identity as ClaimsIdentity)?.FindFirst("userid")?.Value;
+
+        var authorisedUser = await _userService.GetByIdAsync(Convert.ToInt32(userId));
         var profile = _mapper.Map<UserProfile>(authorisedUser);
         return profile;
     }
     [HttpPatch("/profile/edit")]
     public async Task Edit(ProfileInput profileInput)
     {
-        int userId = 1;
-        var authorisedUser = await _userService.GetByIdAsync(userId);
+        // int userId = 1;
+        var userId = (HttpContext.User.Identity as ClaimsIdentity)?.FindFirst("userid")?.Value;
+
+        var authorisedUser = await _userService.GetByIdAsync(Convert.ToInt32(userId));
         if (!ModelState.IsValid)
         {
             throw new InvalidOperationException("Input value is not correct.");
@@ -49,8 +56,10 @@ public class ProfileController:Controller
     [HttpGet("/profile/coupons")]
     public async Task<ActionResult<List<CouponModel>>> GetUserCoupons(StatusCoupon statusCoupon)
     {
-        int userId = 1;
-        var authorisedUser = await _userService.GetByIdAsync(userId);
+        // int userId = 1;
+        var userId = (HttpContext.User.Identity as ClaimsIdentity)?.FindFirst("userid")?.Value;
+
+        var authorisedUser = await _userService.GetByIdAsync(Convert.ToInt32(userId));
         var coupons = await _profileService.GetUserCoupons(authorisedUser.Id, statusCoupon.ToString());
         
         return Ok(_mapper.Map<List<CouponModel>>(coupons));
@@ -59,28 +68,29 @@ public class ProfileController:Controller
     [HttpGet("/profile/orders")]
     public async Task<ActionResult<List<UserOrdersModel>>> GetUserOrders(Status status)
     {
-        int userId = 1;
-        var authorisedUser = await _userService.GetByIdAsync(userId);
+        // int userId = 1;
+        var userId = (HttpContext.User.Identity as ClaimsIdentity)?.FindFirst("userid")?.Value;
+
+        var authorisedUser = await _userService.GetByIdAsync(Convert.ToInt32(userId));
         if (!ModelState.IsValid)
         {
             throw new InvalidOperationException("Input data is not valid.");
         }
-        Console.WriteLine("here1");
+      
         var userOrders = await _profileService.GetUserOrders(authorisedUser.Id, status);
-        Console.WriteLine("here2");
         
         List<UserOrdersModel> userOrdersModels = new List<UserOrdersModel>();
         foreach (var order in userOrders)
         {
   
             List<string> products = new List<string>();
-         // if (order.Products != null)
-         //    {
-         //        foreach (var product in order.Products)
-         //        {
-         //            products.Add(product.ProductId);
-         //        }
-         //    }
+         if (order.Products != null)
+            {
+                foreach (var product in order.Products)
+                {
+                    products.Add(product.ProductId);
+                }
+            }
 
             userOrdersModels.Add(new UserOrdersModel(order.Id, _mapper.Map<UserAddressModel>(order.UserAddress.Address),order.Date, order.Status, order.TotalPrice,_mapper.Map<CouponModel>(order.Coupon), products));
         }

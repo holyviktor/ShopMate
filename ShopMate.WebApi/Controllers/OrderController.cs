@@ -1,4 +1,6 @@
-﻿using AutoMapper;
+﻿using System.Security.Claims;
+using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ShopMate.Application.Services;
@@ -10,6 +12,7 @@ using ShopMate.WebApi.Models;
 namespace ShopMate.WebApi.Controllers
 {
     [ApiController]
+    [Authorize]
     public class OrderController : Controller
     {
         private readonly ShopMateDbContext _dbContext;
@@ -31,8 +34,10 @@ namespace ShopMate.WebApi.Controllers
         [Route("/orders/create")]
         public async Task<OrderCreationInfo> Create([FromQuery]CreateOrder orderInfo)
         {
-            var userId = 1;
-            var authorisedUser = await _userService.GetByIdAsync(userId);
+            // var userId = 1;
+            var userId = (HttpContext.User.Identity as ClaimsIdentity)?.FindFirst("userid")?.Value;
+
+            var authorisedUser = await _userService.GetByIdAsync(Convert.ToInt32(userId));
             var orderCreationInfo = _mapper.Map<OrderCreationInfo>(orderInfo);
 
             orderCreationInfo.User = _mapper.Map<UserOrder>(authorisedUser);
@@ -61,8 +66,10 @@ namespace ShopMate.WebApi.Controllers
             {
                 throw new InvalidOperationException("Input data is not valid.");
             }
-            int userId = 1;
-            var authorisedUser = await _userService.GetByIdAsync(userId);
+            // int userId = 1;
+            var userId = (HttpContext.User.Identity as ClaimsIdentity)?.FindFirst("userid")?.Value;
+
+            var authorisedUser = await _userService.GetByIdAsync(Convert.ToInt32(userId));
             await _orderService.CreateOrderAsync(authorisedUser.Id, orderInput);
             authorisedUser.FirstName = orderInput.UserOrder.FirstName;
             authorisedUser.LastName = orderInput.UserOrder.LastName;
