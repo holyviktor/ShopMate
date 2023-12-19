@@ -1,4 +1,5 @@
-﻿using System.Security.Cryptography;
+﻿using System.Globalization;
+using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 using Microsoft.EntityFrameworkCore;
@@ -73,7 +74,7 @@ public class UserService : IUserService
     }
 
     public async Task<string> SignUpUser(string firstname, string lastname, string email, string password,
-        DateTime dateBirth, string phoneNumber)
+        string dateBirth, string phoneNumber)
     {
         var user = await _dbContext.Users.SingleOrDefaultAsync(x => x.Email == email);
         if (user != null)
@@ -87,7 +88,7 @@ public class UserService : IUserService
             LastName = lastname,
             Email = email,
             Password = HashPassword(password),
-            DateBirth = dateBirth,
+            DateBirth =  DateTime.ParseExact(dateBirth, "dd.MM.yyyy", CultureInfo.InvariantCulture),
             PhoneNumber = phoneNumber,
             RoleId = 2
         };
