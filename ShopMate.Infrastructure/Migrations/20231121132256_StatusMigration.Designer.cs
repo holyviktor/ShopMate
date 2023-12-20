@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ShopMate.Infrastructure.Data;
 
@@ -11,9 +12,11 @@ using ShopMate.Infrastructure.Data;
 namespace ShopMate.Infrastructure.Migrations
 {
     [DbContext(typeof(ShopMateDbContext))]
-    partial class ShopMateDbContextModelSnapshot : ModelSnapshot
+    [Migration("20231121132256_StatusMigration")]
+    partial class StatusMigration
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,34 +24,6 @@ namespace ShopMate.Infrastructure.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
-
-            modelBuilder.Entity("ShopMate.Core.Entities.Address", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("City")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Flat")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("House")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Street")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Addresses");
-                });
 
             modelBuilder.Entity("ShopMate.Core.Entities.Basket", b =>
                 {
@@ -183,31 +158,27 @@ namespace ShopMate.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int?>("CouponId")
+                    b.Property<int>("CouponId")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("Date")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("Status")
+                    b.Property<int>("StatusId")
                         .HasColumnType("int");
 
                     b.Property<double>("TotalPrice")
                         .HasColumnType("float");
 
-                    b.Property<int>("UserAddressId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("UserId")
+                    b.Property<int>("UserId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
 
                     b.HasIndex("CouponId")
-                        .IsUnique()
-                        .HasFilter("[CouponId] IS NOT NULL");
+                        .IsUnique();
 
-                    b.HasIndex("UserAddressId");
+                    b.HasIndex("StatusId");
 
                     b.HasIndex("UserId");
 
@@ -297,7 +268,7 @@ namespace ShopMate.Infrastructure.Migrations
                     b.ToTable("Reviews");
                 });
 
-            modelBuilder.Entity("ShopMate.Core.Entities.Role", b =>
+            modelBuilder.Entity("ShopMate.Core.Entities.Status", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -311,7 +282,7 @@ namespace ShopMate.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Roles");
+                    b.ToTable("Statuses");
                 });
 
             modelBuilder.Entity("ShopMate.Core.Entities.User", b =>
@@ -345,37 +316,9 @@ namespace ShopMate.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("RoleId")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
-
-                    b.HasIndex("RoleId");
 
                     b.ToTable("Users");
-                });
-
-            modelBuilder.Entity("ShopMate.Core.Entities.UserAddress", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("AddressId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AddressId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("UserAddresses");
                 });
 
             modelBuilder.Entity("ShopMate.Core.Entities.Basket", b =>
@@ -435,21 +378,26 @@ namespace ShopMate.Infrastructure.Migrations
                     b.HasOne("ShopMate.Core.Entities.Coupon", "Coupon")
                         .WithOne("Order")
                         .HasForeignKey("ShopMate.Core.Entities.Order", "CouponId")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("ShopMate.Core.Entities.UserAddress", "UserAddress")
-                        .WithMany("Orders")
-                        .HasForeignKey("UserAddressId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("ShopMate.Core.Entities.User", null)
+                    b.HasOne("ShopMate.Core.Entities.Status", "Status")
                         .WithMany("Orders")
-                        .HasForeignKey("UserId");
+                        .HasForeignKey("StatusId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("ShopMate.Core.Entities.User", "User")
+                        .WithMany("Orders")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
 
                     b.Navigation("Coupon");
 
-                    b.Navigation("UserAddress");
+                    b.Navigation("Status");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("ShopMate.Core.Entities.OrderProduct", b =>
@@ -493,41 +441,6 @@ namespace ShopMate.Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("ShopMate.Core.Entities.User", b =>
-                {
-                    b.HasOne("ShopMate.Core.Entities.Role", "Role")
-                        .WithMany("Users")
-                        .HasForeignKey("RoleId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.Navigation("Role");
-                });
-
-            modelBuilder.Entity("ShopMate.Core.Entities.UserAddress", b =>
-                {
-                    b.HasOne("ShopMate.Core.Entities.Address", "Address")
-                        .WithMany("UserAddresses")
-                        .HasForeignKey("AddressId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("ShopMate.Core.Entities.User", "User")
-                        .WithMany("UserAddresses")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.Navigation("Address");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("ShopMate.Core.Entities.Address", b =>
-                {
-                    b.Navigation("UserAddresses");
-                });
-
             modelBuilder.Entity("ShopMate.Core.Entities.Chat", b =>
                 {
                     b.Navigation("Messages");
@@ -545,9 +458,9 @@ namespace ShopMate.Infrastructure.Migrations
                     b.Navigation("Products");
                 });
 
-            modelBuilder.Entity("ShopMate.Core.Entities.Role", b =>
+            modelBuilder.Entity("ShopMate.Core.Entities.Status", b =>
                 {
-                    b.Navigation("Users");
+                    b.Navigation("Orders");
                 });
 
             modelBuilder.Entity("ShopMate.Core.Entities.User", b =>
@@ -565,13 +478,6 @@ namespace ShopMate.Infrastructure.Migrations
                     b.Navigation("Participants");
 
                     b.Navigation("Reviews");
-
-                    b.Navigation("UserAddresses");
-                });
-
-            modelBuilder.Entity("ShopMate.Core.Entities.UserAddress", b =>
-                {
-                    b.Navigation("Orders");
                 });
 #pragma warning restore 612, 618
         }

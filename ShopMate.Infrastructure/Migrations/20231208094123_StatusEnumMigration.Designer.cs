@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ShopMate.Infrastructure.Data;
 
@@ -11,9 +12,11 @@ using ShopMate.Infrastructure.Data;
 namespace ShopMate.Infrastructure.Migrations
 {
     [DbContext(typeof(ShopMateDbContext))]
-    partial class ShopMateDbContextModelSnapshot : ModelSnapshot
+    [Migration("20231208094123_StatusEnumMigration")]
+    partial class StatusEnumMigration
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -184,12 +187,16 @@ namespace ShopMate.Infrastructure.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int?>("CouponId")
+                        .IsRequired()
                         .HasColumnType("int");
 
                     b.Property<DateTime>("Date")
                         .HasColumnType("datetime2");
 
                     b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<int>("StatusId")
                         .HasColumnType("int");
 
                     b.Property<double>("TotalPrice")
@@ -204,8 +211,7 @@ namespace ShopMate.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("CouponId")
-                        .IsUnique()
-                        .HasFilter("[CouponId] IS NOT NULL");
+                        .IsUnique();
 
                     b.HasIndex("UserAddressId");
 
@@ -297,23 +303,6 @@ namespace ShopMate.Infrastructure.Migrations
                     b.ToTable("Reviews");
                 });
 
-            modelBuilder.Entity("ShopMate.Core.Entities.Role", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Roles");
-                });
-
             modelBuilder.Entity("ShopMate.Core.Entities.User", b =>
                 {
                     b.Property<int>("Id")
@@ -345,12 +334,7 @@ namespace ShopMate.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("RoleId")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
-
-                    b.HasIndex("RoleId");
 
                     b.ToTable("Users");
                 });
@@ -435,7 +419,8 @@ namespace ShopMate.Infrastructure.Migrations
                     b.HasOne("ShopMate.Core.Entities.Coupon", "Coupon")
                         .WithOne("Order")
                         .HasForeignKey("ShopMate.Core.Entities.Order", "CouponId")
-                        .OnDelete(DeleteBehavior.NoAction);
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
 
                     b.HasOne("ShopMate.Core.Entities.UserAddress", "UserAddress")
                         .WithMany("Orders")
@@ -493,17 +478,6 @@ namespace ShopMate.Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("ShopMate.Core.Entities.User", b =>
-                {
-                    b.HasOne("ShopMate.Core.Entities.Role", "Role")
-                        .WithMany("Users")
-                        .HasForeignKey("RoleId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.Navigation("Role");
-                });
-
             modelBuilder.Entity("ShopMate.Core.Entities.UserAddress", b =>
                 {
                     b.HasOne("ShopMate.Core.Entities.Address", "Address")
@@ -543,11 +517,6 @@ namespace ShopMate.Infrastructure.Migrations
             modelBuilder.Entity("ShopMate.Core.Entities.Order", b =>
                 {
                     b.Navigation("Products");
-                });
-
-            modelBuilder.Entity("ShopMate.Core.Entities.Role", b =>
-                {
-                    b.Navigation("Users");
                 });
 
             modelBuilder.Entity("ShopMate.Core.Entities.User", b =>
