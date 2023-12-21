@@ -76,5 +76,19 @@ namespace ShopMate.WebApi.Controllers
 
             await _favouriteService.Delete(authorisedUser.Id, productFavourite.ProductId);
         }
+
+        [HttpPost("/favourite/change")]
+        public async Task Change(ProductFavourite productFavourite)
+        {
+            var userId = (HttpContext.User.Identity as ClaimsIdentity)?.FindFirst("userid")?.Value;
+
+            var authorisedUser = await _userService.GetByIdAsync(Convert.ToInt32(userId));
+            if (!ModelState.IsValid)
+            {
+                throw new InvalidOperationException("Count value is not correct.");
+            }
+
+            await _favouriteService.Change(authorisedUser.Id, productFavourite.ProductId);
+        }
     }
 }
