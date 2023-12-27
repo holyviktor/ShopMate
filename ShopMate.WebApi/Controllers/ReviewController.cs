@@ -62,16 +62,25 @@ public class ReviewController : Controller
     }
     
     [HttpGet("/getListRating")]
-    public async Task<ActionResult<List<double>>> GetListRating([FromQuery]string[] idProducts)
+    public async Task<ActionResult<List<ReviewProduct>>> GetListRating([FromQuery]string[] idProducts)
     {
         if (!ModelState.IsValid)
         {
             throw new InvalidOperationException("Count value is not correct.");
         }
 
-        var rating = await _reviewService.GetListRating(idProducts);
-        
-        return Ok(rating);
+        List<ReviewProduct> reviewProducts = new List<ReviewProduct>();
+
+        for (int i = 0; i < idProducts.Length; i++)
+        {
+            ReviewProduct reviewProduct =
+                new ReviewProduct(await _reviewService.GetRating(idProducts[i]), idProducts[i]);
+            // Console.WriteLine(reviewProduct.ToString());
+            reviewProducts.Add(reviewProduct);
+            
+        }
+        Console.WriteLine(reviewProducts[0].ToString());
+        return Ok(reviewProducts);
     }
     
     [HttpPost("/review/add")]
