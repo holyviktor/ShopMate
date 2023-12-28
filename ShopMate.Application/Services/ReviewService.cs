@@ -60,7 +60,7 @@ public class ReviewService
             sumRating += review.Rating;
         }
 
-        return sumRating / reviews.Count;
+        return reviews.Count==0?0: sumRating / reviews.Count;
     }
 
     public async Task<List<double>> GetListRating(string[] productsId)
