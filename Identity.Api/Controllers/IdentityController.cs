@@ -10,7 +10,7 @@ namespace Identity.Api.Controllers;
 public class IdentityController : ControllerBase
 {
     private const string TokenSecret = "JwtKeyShopMateForProgrammingInOurLifeIwantThisStore";
-    private static readonly TimeSpan TokenLifetime = TimeSpan.FromHours(8);
+    private static readonly TimeSpan TokenLifetime = TimeSpan.FromHours(24*30);
 
     [HttpPost("token")]
     public IActionResult GenerateToken(
