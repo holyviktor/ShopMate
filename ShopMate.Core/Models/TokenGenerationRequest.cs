@@ -1,6 +1,6 @@
 ﻿using System.Security.Claims;
 
-namespace Identity.Api;
+namespace ShopMate.Core.Models;
 
 public class TokenGenerationRequest
 {
