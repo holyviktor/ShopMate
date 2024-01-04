@@ -69,6 +69,7 @@ public class AddressService
     }
     public async Task Delete(int userId, int addressId)
     {
+        var addressPrev = _dbContext.Addresses.SingleOrDefault(x => x.Id == addressId);
         // var address = _dbContext.Addresses.SingleOrDefault(x => x.Id == addressId);
         var userAddress = _dbContext.UserAddresses.Where(x => x.UserId == userId)
             .SingleOrDefault(x => x.AddressId == addressId);
@@ -89,6 +90,14 @@ public class AddressService
         else
         {
             _dbContext.UserAddresses.Remove(userAddress);
+        }
+        await _dbContext.SaveChangesAsync();
+
+        
+        var userAddressList = _dbContext.UserAddresses.Where(x => x.AddressId == addressId);
+        if (userAddressList.IsNullOrEmpty())
+        {
+            _dbContext.Addresses.Remove(addressPrev!);
         }
 
         await _dbContext.SaveChangesAsync();
