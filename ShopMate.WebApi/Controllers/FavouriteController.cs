@@ -45,6 +45,20 @@ namespace ShopMate.WebApi.Controllers
             return Ok(favouritesModel);
         }
         
+        [HttpGet("/favourite")]
+        public async Task<ActionResult<Boolean>> CheckFavourite(string productId)
+        {
+            var userId = (HttpContext.User.Identity as ClaimsIdentity)?.FindFirst("userid")?.Value;
+            var authorisedUser = await _userService.GetByIdAsync(Convert.ToInt32(userId));
+            if (!ModelState.IsValid)
+            {
+                throw new InvalidOperationException("Count value is not correct.");
+            }
+
+            var checkFavourite = await _favouriteService.CheckFavourite(authorisedUser.Id, productId);
+            return Ok(checkFavourite);
+        }
+        
         
         [HttpPost("/favourite/add")]
         public async Task Add(ProductFavourite productFavourite)

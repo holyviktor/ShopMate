@@ -79,8 +79,9 @@ public class AddressController:Controller
         {
             throw new InvalidOperationException("Input value is not correct.");
         }
+        Console.WriteLine(3434);
 
-        await _addressService.Edit(authorisedUser.Id, userAddressModel.City, userAddressModel.Street,
+        await _addressService.Edit(authorisedUser.Id,userAddressModel.Id, userAddressModel.City, userAddressModel.Street,
             userAddressModel.House, userAddressModel.Flat, userAddressModel.Id);
     }
 }

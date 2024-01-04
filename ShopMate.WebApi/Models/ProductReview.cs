@@ -9,5 +9,7 @@ public class ProductReview
     public string ProductId { get; set; }
     public string Text { get; set; }
     public Double Rating { get; set; }
+    public DateTimeOffset date { get; set; }
     public UserForReview UserForReview { get; set; }
+    public Boolean IsThisUser { get; set; }
 }
