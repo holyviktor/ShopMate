@@ -3,6 +3,7 @@ using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using ShopMate.Application.Services;
 using ShopMate.Core.Entities;
 using ShopMate.Core.Models;
@@ -21,6 +22,7 @@ namespace ShopMate.WebApi.Controllers
         private readonly BasketService _basketService;
         private readonly OrderService _orderService;
         private readonly IMapper _mapper;
+
         public OrderController(ShopMateDbContext dbContext, IMapper mapper)
         {
             _dbContext = dbContext;
@@ -30,9 +32,10 @@ namespace ShopMate.WebApi.Controllers
             _basketService = new BasketService(_dbContext);
             _orderService = new OrderService(_dbContext, _mapper);
         }
+
         [HttpGet]
-        [Route("/orders/create")]
-        public async Task<OrderCreationInfo> Create([FromQuery]CreateOrder orderInfo)
+        [Route("/orders/info")]
+        public async Task<OrderCreationInfo> Create([FromQuery] CreateOrder orderInfo)
         {
             // var userId = 1;
             var userId = (HttpContext.User.Identity as ClaimsIdentity)?.FindFirst("userid")?.Value;
@@ -45,40 +48,136 @@ namespace ShopMate.WebApi.Controllers
             var basketProducts = _mapper.Map<List<ProductBasket>>
                 (await _basketService.GetProductsAsync(authorisedUser.Id, orderInfo.ProductsId));
             orderCreationInfo.Products = basketProducts;
-            var price = await _priceService.GetPriceAsync(basketProducts);
-            orderCreationInfo.Price = price;
-      
-            if (orderInfo.CouponId != null)
-            {
-                var priceDiscount = await _priceService.ApplyCouponAsync(price, (int)orderInfo.CouponId);
-                orderCreationInfo.PriceDiscount = priceDiscount;
-            }
-            orderCreationInfo.PriceDiscount = price;
 
             return orderCreationInfo;
         }
 
         [HttpPost]
         [Route("/order/create")]
-        public async Task CreateOrder(OrderInput orderInput)
+        public async Task<int> CreateOrder(OrderInput orderInput)
         {
             if (!ModelState.IsValid)
             {
                 throw new InvalidOperationException("Input data is not valid.");
             }
-            // int userId = 1;
+
             var userId = (HttpContext.User.Identity as ClaimsIdentity)?.FindFirst("userid")?.Value;
 
             var authorisedUser = await _userService.GetByIdAsync(Convert.ToInt32(userId));
-            await _orderService.CreateOrderAsync(authorisedUser.Id, orderInput);
+            int orderId = await _orderService.CreateOrderAsync(authorisedUser.Id, orderInput);
             authorisedUser.FirstName = orderInput.UserOrder.FirstName;
             authorisedUser.LastName = orderInput.UserOrder.LastName;
-            // need to validate phone number
             authorisedUser.PhoneNumber = orderInput.UserOrder.PhoneNumber;
             await _dbContext.SaveChangesAsync();
+            return orderId;
+        }
+
+        [HttpGet]
+        [Route("/order/{id:int}")]
+        public async Task<UserOrderModel> Order(int id)
+        {
+            var userId = (HttpContext.User.Identity as ClaimsIdentity)?.FindFirst("userid")?.Value;
+
+            var authorisedUser = await _userService.GetByIdAsync(Convert.ToInt32(userId));
+
+            var userOrder = await _dbContext.Orders.Include(o => o.UserAddress)
+                .Where(o => o.Id == id && o.UserAddress.UserId == authorisedUser.Id)
+                .Include(o=>o.Coupon)
+                .Include(o=>o.Products)
+                .SingleOrDefaultAsync();
+            if (userOrder == null)
+            {
+                throw new Exception("Order is not found");
+            }
+
+            var orderProducts = _mapper.Map<List<ProductBasket>>(userOrder.Products);
+            
+            var userOrderModel = new UserOrderModel
+            {
+                OrderId = userOrder.Id,
+                ProductBaskets = orderProducts,
+                CouponDiscount = userOrder.Coupon != null ? userOrder.Coupon.Discount:0.0,
+                Date = DateOnly.FromDateTime(userOrder.Date),
+                TotalPrice = userOrder.TotalPrice,
+                Status = userOrder.Status
+            };
+            return userOrderModel;
         }
         
-        
+        [HttpGet]
+        [Route("/orders")]
+        public async Task<List<UserOrderModel>> Orders()
+        {
+            var userId = (HttpContext.User.Identity as ClaimsIdentity)?.FindFirst("userid")?.Value;
 
+            var authorisedUser = await _userService.GetByIdAsync(Convert.ToInt32(userId));
+
+            var userOrders = await _dbContext.Orders.Include(o => o.UserAddress)
+                .Where(o => o.UserAddress.UserId == authorisedUser.Id)
+                .Include(o=>o.Coupon)
+                .Include(o=>o.Products)
+                .ToListAsync();
+            if (userOrders.IsNullOrEmpty())
+            {
+                throw new Exception("Orders are not found");
+            }
+
+            var orders = new List<UserOrderModel>();
+
+            foreach (var order in userOrders)
+            {
+                var orderProducts = _mapper.Map<List<ProductBasket>>(order.Products);
+            
+                var userOrderModel = new UserOrderModel
+                {
+                    OrderId = order.Id,
+                    ProductBaskets = orderProducts,
+                    CouponDiscount = order.Coupon != null ? order.Coupon.Discount:0.0,
+                    Date = DateOnly.FromDateTime(order.Date),
+                    TotalPrice = order.TotalPrice,
+                    Status = order.Status
+                };
+                orders.Add(userOrderModel);
+            }
+            return orders;
+        }
+        
+        [HttpGet]
+        [Route("/orders/status")]
+        public async Task<List<UserOrderModel>> OrdersByStatus(Status status)
+        {
+            var userId = (HttpContext.User.Identity as ClaimsIdentity)?.FindFirst("userid")?.Value;
+
+            var authorisedUser = await _userService.GetByIdAsync(Convert.ToInt32(userId));
+
+            var userOrders = await _dbContext.Orders.Include(o => o.UserAddress)
+                .Where(o => o.UserAddress.UserId == authorisedUser.Id)
+                .Where(o=>o.Status == status)
+                .Include(o=>o.Coupon)
+                .Include(o=>o.Products)
+                .ToListAsync();
+            var orders = new List<UserOrderModel>();
+            if (userOrders.IsNullOrEmpty())
+            {
+                return orders;
+            }
+
+            foreach (var order in userOrders)
+            {
+                var orderProducts = _mapper.Map<List<ProductBasket>>(order.Products);
+            
+                var userOrderModel = new UserOrderModel
+                {
+                    OrderId = order.Id,
+                    ProductBaskets = orderProducts,
+                    CouponDiscount = order.Coupon != null ? order.Coupon.Discount:0.0,
+                    Date = DateOnly.FromDateTime(order.Date),
+                    TotalPrice = order.TotalPrice,
+                    Status = order.Status
+                };
+                orders.Add(userOrderModel);
+            }
+            return orders;
+        }
     }
 }
