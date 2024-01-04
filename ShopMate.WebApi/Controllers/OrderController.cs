@@ -144,15 +144,28 @@ namespace ShopMate.WebApi.Controllers
         
         [HttpGet]
         [Route("/orders/status")]
-        public async Task<List<UserOrderModel>> OrdersByStatus(Status status)
+        public async Task<List<UserOrderModel>> OrdersByStatus(String status)
         {
+            Status[] statuses;
+            if (status == "Активні")
+            {
+                statuses = new[] { Status.Unpaid,
+                    Status.InProcess,
+                    Status.Sent,
+                    };
+            }
+            else
+            {
+                statuses = new[] { Status.Delivered,
+                    Status.Cancelled, };
+            }
             var userId = (HttpContext.User.Identity as ClaimsIdentity)?.FindFirst("userid")?.Value;
 
             var authorisedUser = await _userService.GetByIdAsync(Convert.ToInt32(userId));
 
             var userOrders = await _dbContext.Orders.Include(o => o.UserAddress)
                 .Where(o => o.UserAddress.UserId == authorisedUser.Id)
-                .Where(o=>o.Status == status)
+                .Where(o=>statuses.Contains(o.Status))
                 .Include(o=>o.Coupon)
                 .Include(o=>o.Products)
                 .ToListAsync();
