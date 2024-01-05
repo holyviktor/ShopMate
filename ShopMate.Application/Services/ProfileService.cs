@@ -52,4 +52,19 @@ public class ProfileService
         }
         await _dbContext.SaveChangesAsync();
     }
+
+    public async Task ChangePasswordAsync(User user, string oldPassword, string newPassword)
+    {
+        if (user.Password == UserService.HashPassword(oldPassword))
+        {
+            user.Password = UserService.HashPassword(newPassword);
+            await _dbContext.SaveChangesAsync();
+        }
+        else
+        {
+            throw new InvalidOperationException("Old password is incorrect!");
+        }
+        
+    }
+
 }

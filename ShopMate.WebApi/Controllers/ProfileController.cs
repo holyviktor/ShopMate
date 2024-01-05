@@ -33,6 +33,16 @@ public class ProfileController:Controller
         var profile = _mapper.Map<UserProfile>(authorisedUser);
         return profile;
     }
+    
+    [HttpPatch("/profile/password/change")]
+    public async Task ChangePassword(PasswordChanging passwordChanging)
+    {
+        var userId = (HttpContext.User.Identity as ClaimsIdentity)?.FindFirst("userid")?.Value;
+
+        var authorisedUser = await _userService.GetByIdAsync(Convert.ToInt32(userId));
+        await _profileService.ChangePasswordAsync(authorisedUser, passwordChanging.OldPassword,
+            passwordChanging.NewPassword);
+    }
     [HttpPatch("/profile/edit")]
     public async Task Edit(ProfileInput profileInput)
     {
@@ -47,8 +57,8 @@ public class ProfileController:Controller
 
         authorisedUser.FirstName = profileInput.FirstName;
         authorisedUser.LastName = profileInput.LastName;
-        authorisedUser.Password = profileInput.LastName;
         authorisedUser.PhoneNumber = profileInput.PhoneNumber;
+        authorisedUser.Email = profileInput.Email;
         authorisedUser.DateBirth = profileInput.DateBirth;
         await _dbContext.SaveChangesAsync();
     }

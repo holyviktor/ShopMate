@@ -7,16 +7,19 @@ using ShopMate.Core.Entities;
 using ShopMate.Core.Interfaces;
 using ShopMate.Infrastructure.Data;
 using Newtonsoft.Json;
+using ShopMate.Core.Models;
 
 namespace ShopMate.Application.Services;
 
 public class UserService : IUserService
 {
     private readonly ShopMateDbContext _dbContext;
+    private readonly IdentityService _identityService;
 
     public UserService(ShopMateDbContext dbContext)
     {
         _dbContext = dbContext;
+        _identityService = new IdentityService();
     }
 
     public async Task<User> GetByIdAsync(int userId)
@@ -42,35 +45,13 @@ public class UserService : IUserService
         {
             throw new Exception("WrongPassword");
         }
-
-        var client = new HttpClient();
-        var data = new TokenUser
+        var data = new TokenGenerationRequest()
         {
             UserId = user.Id.ToString(),
             Email = user.Email,
             Role = user.Role.Name
         };
-        // string jsonData = JsonConvert.SerializeObject(data);
-        var url = "https://localhost:7078/token";
-
-        string jsonData = JsonConvert.SerializeObject(data);
-
-        var content = new StringContent(jsonData, Encoding.UTF8, "application/json");
-
-        var response = await client.PostAsync(url, content);
-        try
-        {
-            response.EnsureSuccessStatusCode();
-            string responseData = await response.Content.ReadAsStringAsync();
-
-
-            return responseData ?? throw new InvalidOperationException("Error");
-        }
-        catch (HttpRequestException)
-        {
-            throw new Exception(response.StatusCode.ToString());
-        }
-
+        return _identityService.GenerateToken(data);
     }
 
     public async Task<string> SignUpUser(string firstname, string lastname, string email, string password,

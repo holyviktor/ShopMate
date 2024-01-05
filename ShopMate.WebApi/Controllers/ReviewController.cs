@@ -36,13 +36,20 @@ public class ReviewController : Controller
         {
             throw new InvalidOperationException("Count value is not correct.");
         }
+        var userId = (HttpContext.User.Identity as ClaimsIdentity)?.FindFirst("userid")?.Value;
 
+        var authorisedUser = await _userService.GetByIdAsync(Convert.ToInt32(userId));
         var reviews = await _reviewService.GetAllReviews(idProduct);
         var reviewsModel = _mapper.Map<List<ProductReview>>(reviews);
         for (int i = 0; i < reviews.Count; i++)
         {
             var user = _mapper.Map<UserForReview>(reviews[i].User);
+            Console.WriteLine(user);
+            Console.WriteLine(reviews[i].User);
             reviewsModel[i].UserForReview = user;
+            reviewsModel[i].IsThisUser  = user.Email == authorisedUser.Email;
+            Console.WriteLine((HttpContext.User.Identity as ClaimsIdentity)?.FindFirst("email")?.Value);
+            Console.WriteLine(reviewsModel[i].IsThisUser);
         }
         return Ok(reviewsModel);
     }
@@ -62,16 +69,25 @@ public class ReviewController : Controller
     }
     
     [HttpGet("/getListRating")]
-    public async Task<ActionResult<List<double>>> GetListRating([FromQuery]string[] idProducts)
+    public async Task<ActionResult<List<ReviewProduct>>> GetListRating([FromQuery]string[] idProducts)
     {
         if (!ModelState.IsValid)
         {
             throw new InvalidOperationException("Count value is not correct.");
         }
 
-        var rating = await _reviewService.GetListRating(idProducts);
-        
-        return Ok(rating);
+        List<ReviewProduct> reviewProducts = new List<ReviewProduct>();
+
+        for (int i = 0; i < idProducts.Length; i++)
+        {
+            ReviewProduct reviewProduct =
+                new ReviewProduct(await _reviewService.GetRating(idProducts[i]), idProducts[i]);
+            // Console.WriteLine(reviewProduct.ToString());
+            reviewProducts.Add(reviewProduct);
+            
+        }
+        Console.WriteLine(reviewProducts[0].ToString());
+        return Ok(reviewProducts);
     }
     
     [HttpPost("/review/add")]

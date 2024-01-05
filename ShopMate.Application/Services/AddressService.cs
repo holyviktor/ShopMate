@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using ShopMate.Core.Entities;
 using ShopMate.Infrastructure.Data;
 
@@ -68,6 +69,7 @@ public class AddressService
     }
     public async Task Delete(int userId, int addressId)
     {
+        var addressPrev = _dbContext.Addresses.SingleOrDefault(x => x.Id == addressId);
         // var address = _dbContext.Addresses.SingleOrDefault(x => x.Id == addressId);
         var userAddress = _dbContext.UserAddresses.Where(x => x.UserId == userId)
             .SingleOrDefault(x => x.AddressId == addressId);
@@ -89,11 +91,19 @@ public class AddressService
         {
             _dbContext.UserAddresses.Remove(userAddress);
         }
+        await _dbContext.SaveChangesAsync();
+
+        
+        var userAddressList = _dbContext.UserAddresses.Where(x => x.AddressId == addressId);
+        if (userAddressList.IsNullOrEmpty())
+        {
+            _dbContext.Addresses.Remove(addressPrev!);
+        }
 
         await _dbContext.SaveChangesAsync();
     }
     
-    public async Task Edit(int userId, string city, string street, string house, string? flat, int prevAddressId)
+    public async Task Edit(int userId, int addressPrevId, string city, string street, string house, string? flat, int prevAddressId)
 
     {
         await AddAddress(city, street, house, flat);
@@ -122,5 +132,18 @@ public class AddressService
             _dbContext.UserAddresses.Add(userAddress);
         }
         await _dbContext.SaveChangesAsync();
+
+        var addressPrev = _dbContext.Addresses.SingleOrDefault(x => x.Id == addressPrevId);
+        Console.WriteLine(12121);
+        Console.WriteLine(addressPrev);
+        var userAddressList = _dbContext.UserAddresses.Where(x => x.AddressId == addressPrev!.Id);
+        Console.WriteLine(userAddressList);
+        if (userAddressList.IsNullOrEmpty())
+        {
+            Console.WriteLine(12121);
+            _dbContext.Addresses.Remove(addressPrev!);
+        }
+        await _dbContext.SaveChangesAsync();
+        
     }
 }

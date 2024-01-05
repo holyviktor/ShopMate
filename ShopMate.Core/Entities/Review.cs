@@ -15,5 +15,7 @@ namespace ShopMate.Core.Entities
         public string Text { get; set; }
         public Double Rating { get; set; }
         public User User { get; set; }
+        
+        public DateTime date { get; set; }
     }
 }

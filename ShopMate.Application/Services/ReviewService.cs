@@ -31,7 +31,7 @@ public class ReviewService
             throw new Exception(response.StatusCode.ToString());
         }
 
-        var reviews = _dbContext.Reviews.Where(x => x.ProductId == productId).ToList();
+        var reviews = _dbContext.Reviews.Where(x => x.ProductId == productId).Include(product => product.User).ToList();
         return await Task.FromResult(reviews);
     }
 
@@ -60,7 +60,7 @@ public class ReviewService
             sumRating += review.Rating;
         }
 
-        return sumRating / reviews.Count;
+        return reviews.Count==0?0: sumRating / reviews.Count;
     }
 
     public async Task<List<double>> GetListRating(string[] productsId)
@@ -103,13 +103,14 @@ public class ReviewService
                 ProductId = productId,
                 Text = text,
                 Rating = rating,
+                date = DateTime.Now,
                 IsVerified = IsVerified(userId, productId)
             };
             _dbContext.Reviews.Add(review);
         }
         else
         {
-            throw new InvalidOperationException("ThereAreAlready5Reviews");
+            throw new InvalidOperationException("ThereAreAlreadyReviews");
         }
 
         await _dbContext.SaveChangesAsync();

@@ -13,13 +13,13 @@ namespace ShopMate.Application.Services
             _dbContext = dbContext;
         }
 
-        public async Task<List<Basket>> GetProductsAsync(int userId, int[] productsIds)
+        public async Task<List<Basket>> GetProductsAsync(int userId, string[] productsIds)
         {
             List<Basket> basketProducts = new List<Basket>();
             foreach(var product in productsIds)
             {
                 var basketProduct = await _dbContext.Baskets
-                    .FirstOrDefaultAsync(b => b.UserId == userId && b.ProductId == product.ToString());
+                    .FirstOrDefaultAsync(b => b.UserId == userId && b.ProductId == product);
                 if (basketProduct == null)
                 {
                     throw new InvalidOperationException("Product is not in your basket.");

@@ -24,7 +24,7 @@ public class OrderService : IOrderService
         _couponsService = new CouponsService(_dbContext);
     }
 
-    public async Task CreateOrderAsync(int userId, OrderInput orderInput)
+    public async Task<int> CreateOrderAsync(int userId, OrderInput orderInput)
     {
         var coupon = _dbContext.Coupons.FirstOrDefault(c => c.Id == orderInput.CouponId && c.UserId == userId);
 
@@ -64,6 +64,7 @@ public class OrderService : IOrderService
         _dbContext.Baskets.RemoveRange(baskets);
         
         await _dbContext.SaveChangesAsync();
+        return order.Id;
     }
 
     private async Task CreateOrderProductsAsync(List<ProductBasket> basketProducts, int orderId)

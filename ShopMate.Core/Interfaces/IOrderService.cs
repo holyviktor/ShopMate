@@ -9,6 +9,6 @@ namespace ShopMate.Core.Interfaces
 {
     public interface IOrderService
     {
-        public Task CreateOrderAsync(int userId, OrderInput orderInput);
+        public Task<int> CreateOrderAsync(int userId, OrderInput orderInput);
     }
 }
